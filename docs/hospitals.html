@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Directory of the London neonatal hospital units included in the HO.ME postcode lookup, with care levels, networks and contact details." />
+    <meta name="robots" content="index, follow" />
+    <title>Hospital Directory - HO.ME</title>
+    <link rel="canonical" href="https://hometool.uk/hospitals.html" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="HO.ME" />
+    <meta property="og:title" content="London Neonatal Hospital Directory - HO.ME" />
+    <meta property="og:description" content="Neonatal units included in the HO.ME postcode lookup, with care levels, networks and contact details." />
+    <meta property="og:url" content="https://hometool.uk/hospitals.html" />
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "London Neonatal Hospital Directory",
+        "url": "https://hometool.uk/hospitals.html",
+        "description": "Directory of neonatal hospital units included in the HO.ME London postcode lookup.",
+        "isPartOf": {
+            "@type": "WebSite",
+            "name": "HO.ME",
+            "url": "https://hometool.uk/"
+        }
+    }
+    </script>
+    <link rel="stylesheet" href="site.css" />
+    <style>
+        .summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+        .stat { background: var(--surface); border: 1.5px solid #e5f0ec; border-radius: var(--radius); padding: 14px 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+        .stat-value { font-size: 1.45rem; line-height: 1.2; font-weight: 500; color: var(--text); }
+        .stat-label { font-size: 0.82rem; color: var(--text-muted); margin-top: 2px; }
+        .directory { background: var(--surface); border: 1.5px solid #e5f0ec; border-radius: var(--radius); overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px 18px; border-bottom: 1px solid #eef5f2; text-align: left; vertical-align: middle; }
+        th { background: #fafdfc; border-bottom-color: #e5f0ec; color: var(--text-muted); font-size: 0.7rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; }
+        td { font-size: 0.92rem; }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr.contact-trigger { cursor: pointer; transition: background 0.12s; }
+        tbody tr.contact-trigger:hover { background: #f8fbfa; }
+        tbody tr.contact-trigger:focus-visible { outline: none; box-shadow: inset 0 0 0 3px rgba(102,188,162,0.35); }
+        .hospital-name { font-weight: 500; color: var(--text); line-height: 1.25; margin-bottom: 3px; }
+        .phone { color: var(--text-muted); display: inline-flex; align-items: center; gap: 5px; font-size: 0.78rem; font-weight: 400; white-space: nowrap; }
+        .phone svg { width: 11px; height: 11px; flex: 0 0 auto; }
+        .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .empty { color: var(--text-muted); font-size: 0.88rem; }
+        @media (max-width: 760px) {
+            .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            table, thead, tbody, tr, th, td { display: block; }
+            thead { display: none; }
+            tr { border-bottom: 1px solid var(--border); padding: 10px 0; }
+            tbody tr:last-child { border-bottom: none; }
+            td { border: none; padding: 6px 14px; }
+            td::before { content: attr(data-label); display: block; color: var(--text-muted); font-size: 0.72rem; font-weight: 500; text-transform: uppercase; margin-bottom: 3px; }
+        }
+    </style>
+</head>
+<body class="site-body">
+    <header class="site-header">
+        <div class="header-inner">
+            <a class="app-brand" href="index.html" aria-label="HO.ME home">
+                <img src="assets/home-map-light.svg" alt="HO.ME - HOspital near ME">
+                <span class="app-brand-sep" aria-hidden="true"></span>
+                <span class="app-brand-caption">HOspital near ME</span>
+            </a>
+            <form class="header-search" id="headerSearchForm" autocomplete="off">
+                <div class="search-row">
+                    <div class="search-input-wrap">
+                        <svg class="search-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <label class="search-label" for="headerPostcodeInput">Enter a postcode</label>
+                        <input type="text" id="headerPostcodeInput" placeholder="Enter postcode - e.g. SE1 7EH" />
+                        <button type="button" class="clear-btn" id="headerClearBtn" aria-label="Clear postcode">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </button>
+                    </div>
+                    <button type="submit" class="search-btn">Search</button>
+                </div>
+            </form>
+            <div class="header-actions">
+                <div class="header-caption">London Neonatal Units</div>
+                <a class="feedback-btn" href="https://forms.cloud.microsoft/e/dCrxb4BRCq" target="_blank" rel="noopener" data-feedback>Submit Feedback</a>
+            </div>
+        </div>
+        <div class="header-accent" aria-hidden="true"></div>
+    </header>
+    <main class="page">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a class="crumb-back" href="index.html" aria-label="Back to lookup">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            </a>
+            <a class="crumb-home" href="index.html">Home</a>
+            <span class="breadcrumb-sep" aria-hidden="true">/</span>
+            <span aria-current="page">Hospitals</span>
+        </nav>
+        <h1 class="page-title">London Neonatal Units</h1>
+        <p class="page-description">Neonatal hospital units included in the HO.ME postcode lookup, with their network, level of care, listed specialties and main hospital contact number.</p>
+        <section class="summary" aria-label="Hospital summary">
+            <div class="stat"><div class="stat-value" id="totalHospitals">-</div><div class="stat-label">Hospitals</div></div>
+            <div class="stat"><div class="stat-value" id="level3Count">-</div><div class="stat-label">Level 3 units</div></div>
+            <div class="stat"><div class="stat-value" id="level2Count">-</div><div class="stat-label">Level 2 units</div></div>
+            <div class="stat"><div class="stat-value" id="level1Count">-</div><div class="stat-label">Level 1 units</div></div>
+        </section>
+        <section class="directory">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Hospital</th>
+                        <th>Network</th>
+                        <th>Care Level</th>
+                        <th>Specialties</th>
+                    </tr>
+                </thead>
+                <tbody id="hospitalRows">
+                    <tr><td colspan="4" class="empty">Loading hospitals...</td></tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <span>HO.ME &nbsp;&middot;&nbsp; ~333,000 London-area postcodes</span>
+        <span class="footer-sep">|</span>
+        <a href="hospitals.html">Hospitals</a>
+        <span class="footer-sep">|</span>
+        <a href="about.html">About</a>
+        <span class="footer-sep">|</span>
+        <a href="privacy.html">Privacy</a>
+        <span class="footer-sep">|</span>
+        <a href="index.html?view=catchment" id="catchmentLink">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+            Catchment Map
+        </a>
+        <span class="footer-sep">|</span>
+        <span>Erin Coupland &amp; Hammad Khan</span>
+    </footer>
+    <script src="site.js"></script>
+    <script>
+        const { escapeHtml, displayHospitalName, hospitalPhones, normaliseNetwork, networkLabel, levelShortNames, bindContactTrigger } = HOME;
+        const PHONE_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>';
+        function directorySortName(name) {
+            return displayHospitalName(name).replace(/^St\.?\s+/i, '');
+        }
+        function renderTags(tags) {
+            const parts = String(tags || '').split(',').map(t => t.trim()).filter(Boolean);
+            if (!parts.length) return '<span class="empty">None listed</span>';
+            return '<div class="tags">' + parts.map(tag => '<span class="tag">' + escapeHtml(tag) + '</span>').join('') + '</div>';
+        }
+        function renderPhone(hospitalName) {
+            const phone = hospitalPhones[hospitalName];
+            if (!phone) return '<span class="empty">Not listed</span>';
+            return '<span class="phone">' + PHONE_ICON + escapeHtml(phone) + '</span>';
+        }
+        fetch('hospitals.json')
+            .then(response => response.json())
+            .then(hospitals => {
+                const rows = document.getElementById('hospitalRows');
+                const sorted = hospitals.slice().sort((a, b) =>
+                    directorySortName(a.name).localeCompare(directorySortName(b.name))
+                );
+                document.getElementById('totalHospitals').textContent = sorted.length;
+                document.getElementById('level3Count').textContent = sorted.filter(h => h.level === 3).length;
+                document.getElementById('level2Count').textContent = sorted.filter(h => h.level === 2).length;
+                document.getElementById('level1Count').textContent = sorted.filter(h => h.level === 1).length;
+                rows.innerHTML = sorted.map(hospital => {
+                    const level = Number(hospital.level);
+                    const levelText = 'Level ' + level + ' - ' + (levelShortNames[level] || '');
+                    return `
+                        <tr>
+                            <td data-label="Hospital">
+                                <div class="hospital-name">${escapeHtml(displayHospitalName(hospital.name))}</div>
+                                ${renderPhone(hospital.name)}
+                            </td>
+                            <td data-label="Network"><span class="network-pill">${escapeHtml(networkLabel(hospital.sector))}</span></td>
+                            <td data-label="Care Level"><span class="level-badge lvl-${level}">${escapeHtml(levelText)}</span></td>
+                            <td data-label="Specialties">${renderTags(hospital.tags)}</td>
+                        </tr>
+                    `;
+                }).join('');
+                rows.querySelectorAll('tr').forEach((row, i) => bindContactTrigger(row, () => sorted[i]));
+            })
+            .catch(() => {
+                document.getElementById('hospitalRows').innerHTML =
+                    '<tr><td colspan="4" class="empty">Hospital data could not be loaded.</td></tr>';
+            });
+    </script>
+</body>
+</html>

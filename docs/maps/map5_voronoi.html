@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Catchment Grid</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link href="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css" rel="stylesheet"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet/leaflet-maplibre-gl.js"></script>
+<style>
+html,body{margin:0;height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
+#map{height:100%;}
+#ctrl{position:absolute;top:10px;right:10px;z-index:800;background:white;border-radius:10px;
+  box-shadow:0 2px 10px rgba(0,0,0,.2);padding:10px 14px;min-width:205px;font-size:13px;}
+#ctrl .t{font-weight:700;color:#1e3a5f;margin-bottom:8px;}
+#ctrl label{display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:6px;
+  cursor:pointer;transition:background .12s;color:#2d3748;}
+#ctrl label:hover{background:#f7fafc;}
+#ctrl label.sel{background:#ebf8ff;color:#2d6a9f;font-weight:600;}
+#ctrl input[type=radio]{accent-color:#2d6a9f;}
+#ctrl .sep{border-top:1px solid #e2e8f0;margin:8px 0;}
+#leg{position:absolute;bottom:20px;left:10px;z-index:800;background:white;border-radius:10px;
+  box-shadow:0 2px 8px rgba(0,0,0,.2);padding:10px 14px;font-size:11.5px;
+  max-height:55vh;overflow-y:auto;line-height:1.85;max-width:220px;display:none;}
+.sw{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:5px;vertical-align:middle;}
+</style></head><body>
+<div id="loading" style="position:absolute;inset:0;z-index:9999;background:#f0f4f8;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.75rem;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#4a5568;">
+  <div style="font-weight:700;font-size:1rem;color:#1e3a5f;">Loading catchment data&hellip;</div>
+  <div style="width:260px;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;">
+    <div id="barFill" style="height:100%;background:#2d6a9f;border-radius:3px;width:0;transition:width .3s;"></div>
+  </div>
+  <div id="loadMsg" style="font-size:.82rem;">Fetching postcodes.json</div>
+</div>
+<div id="map"></div>
+<div id="ctrl" style="display:none;">
+  <div class="t">Care level</div>
+  <label class="sel"><input type="radio" name="lv" value="0" checked> Any Level</label>
+  <label><input type="radio" name="lv" value="1"> Level 1 &mdash; Special Care</label>
+  <label><input type="radio" name="lv" value="2"> Level 2 &mdash; High Dependency</label>
+  <label><input type="radio" name="lv" value="3"> Level 3 &mdash; NICU</label>
+  <div class="sep"></div>
+  <label><input type="checkbox" id="hTog" checked> Hospital markers</label>
+</div>
+<div id="leg"></div>
+<div id="status" style="position:absolute;bottom:10px;right:10px;z-index:800;background:rgba(255,255,255,.92);border-radius:6px;padding:4px 10px;font-size:11px;color:#718096;box-shadow:0 1px 4px rgba(0,0,0,.15);display:none;"></div>
+<script>
+var GLAT=0.008,GLON=0.012;
+
+var GridLayer=L.Layer.extend({
+  initialize:function(cells,fn){this._cells=cells;this._fn=fn;},
+  onAdd:function(map){
+    this._map=map;var c=document.createElement('canvas');
+    c.style.cssText='position:absolute;top:0;left:0;pointer-events:none;z-index:200;';
+    map.getPanes().tilePane.parentNode.insertBefore(c,map.getPanes().overlayPane);
+    this._canvas=c;this._resize();
+    map.on('movestart',function(){this._canvas.style.opacity='0';},this);
+    map.on('moveend zoomend',function(){this._canvas.style.opacity='1';this._draw();},this);
+    map.on('resize',function(){this._resize();this._draw();},this);this._draw();
+  },
+  onRemove:function(map){this._canvas.parentNode.removeChild(this._canvas);},
+  update:function(fn){this._fn=fn;this._draw();},
+  _resize:function(){var s=this._map.getSize();this._canvas.width=s.x;this._canvas.height=s.y;},
+  _draw:function(){
+    var ctx=this._canvas.getContext('2d'),s=this._map.getSize(),map=this._map,fn=this._fn;
+    ctx.clearRect(0,0,s.x,s.y);
+    this._cells.forEach(function(cell){
+      var col=fn(cell);if(!col)return;
+      ctx.fillStyle=col;
+      var tl=map.latLngToContainerPoint([cell[0]+GLAT,cell[1]]);
+      var br=map.latLngToContainerPoint([cell[0],cell[1]+GLON]);
+      ctx.fillRect(tl.x,tl.y,Math.max(2,br.x-tl.x),Math.max(2,br.y-tl.y));
+    });
+  }
+});
+
+var map=L.map('map').setView([51.5,-0.1],10);
+L.maplibreGL({style:'https://tiles.openfreemap.org/styles/positron',attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
+
+var gridLayer,hospLayer;
+Promise.all([
+  fetch('../postcodes.json').then(function(r){document.getElementById('barFill').style.width='50%';return r.json();}),
+  fetch('../hospitals.json').then(function(r){return r.json();})
+]).then(function(res){
+  var pcData=res[0],hospData=res[1],names=pcData.names,data=pcData.data;
+  document.getElementById('barFill').style.width='80%';
+  document.getElementById('loadMsg').textContent='Building grid\u2026';
+
+  var nc=names.map(function(_,i){return 'hsl('+Math.round((i/names.length)*360)+',75%,45%)';});
+
+  // Bin every postcode into a grid cell, count votes per hospital per level
+  var grid={};
+  var keys=Object.keys(data);
+  for(var i=0;i<keys.length;i++){
+    var r=data[keys[i]];
+    var lat=r[1],lon=r[2];
+    var cLat=Math.floor(lat/GLAT)*GLAT;
+    var cLon=Math.floor(lon/GLON)*GLON;
+    var k=cLat+'|'+cLon;
+    if(!grid[k])grid[k]=[cLat,cLon,[{},{},{},{}]];
+    // r[4]=any_idx, r[6]=l1_idx, r[8]=l2_idx, r[10]=l3_idx
+    var lvCols=[4,6,8,10];
+    for(var li=0;li<4;li++){var h=r[lvCols[li]];if(h!=null)grid[k][2][li][h]=(grid[k][2][li][h]||0)+1;}
+  }
+
+  // Compute mode hospital for each level in each cell
+  var cells=[];
+  var gKeys=Object.keys(grid);
+  for(var gi=0;gi<gKeys.length;gi++){
+    var g=grid[gKeys[gi]];
+    var modes=[];
+    for(var li=0;li<4;li++){
+      var counts=g[2][li],best=-1,bestH=-1;
+      var hs=Object.keys(counts);
+      for(var hi=0;hi<hs.length;hi++){var hh=parseInt(hs[hi]);if(counts[hh]>best){best=counts[hh];bestH=hh;}}
+      modes.push(bestH);
+    }
+    cells.push([g[0],g[1],modes]); // [cellLat, cellLon, [m0,m1,m2,m3]]
+  }
+
+  var lv=0;
+  function makeColorFn(lvl){return function(cell){var h=cell[2][lvl];return h>=0?nc[h]+' / 0.55)'.replace(')',',0.55)').replace('hsl(','hsla('):null;};}
+
+  // Simpler: just use nc[h] with globalAlpha
+  function colorFn(cell){var h=cell[2][lv];return h>=0?nc[h]:null;}
+  gridLayer=new GridLayer(cells,colorFn);
+  gridLayer._canvas&&(gridLayer._canvas.style.opacity='0.7');
+  gridLayer.addTo(map);
+
+  // Set canvas opacity after add
+  setTimeout(function(){if(gridLayer._canvas)gridLayer._canvas.style.opacity='0.72';},100);
+
+  hospLayer=L.layerGroup().addTo(map);
+  var ncMap={};names.forEach(function(n,i){ncMap[n]=nc[i];});
+  hospData.forEach(function(h){
+    L.circleMarker([h.lat,h.lon],{radius:8,color:'#1a202c',weight:2,
+      fillColor:ncMap[h.name]||'#666',fillOpacity:1})
+     .bindPopup('<b>'+h.name+'</b><br>Level '+h.level+' | '+h.side)
+     .bindTooltip(h.name).addTo(hospLayer);
+  });
+
+  document.querySelectorAll('input[name=lv]').forEach(function(radio){
+    radio.addEventListener('change',function(){
+      lv=parseInt(this.value,10);
+      gridLayer.update(colorFn);
+      document.querySelectorAll('#ctrl label').forEach(function(l){l.classList.remove('sel');});
+      this.parentElement.classList.add('sel');
+    });
+  });
+  document.getElementById('hTog').addEventListener('change',function(){
+    if(this.checked)map.addLayer(hospLayer);else map.removeLayer(hospLayer);
+  });
+
+  var leg=document.getElementById('leg'),html='<b>Hospital catchment</b><br>';
+  names.forEach(function(n,i){html+='<span class="sw" style="background:'+nc[i]+'"></span>'+n+'<br>';});
+  leg.innerHTML=html;
+  document.getElementById('status').textContent=
+    cells.length.toLocaleString()+' grid cells from '+keys.length.toLocaleString()+' postcodes';
+  document.getElementById('loading').style.display='none';
+  document.getElementById('ctrl').style.display='';
+  leg.style.display='';document.getElementById('status').style.display='';
+}).catch(function(e){document.getElementById('loadMsg').textContent='Error: '+e.message;});
+</script></body></html>
